@@ -11,6 +11,7 @@ public class ItemQuickTable extends Item {
 	public ItemQuickTable() {
 		super();
 		this.setCreativeTab(CreativeTab.tab1);
+		this.setMaxStackSize(1);
 		this.setUnlocalizedName(QuickCrafting.MODID + ":" + "quickTableItem");
 		this.setTextureName(QuickCrafting.MODID + ":" + "quickTableItem");
 	}
