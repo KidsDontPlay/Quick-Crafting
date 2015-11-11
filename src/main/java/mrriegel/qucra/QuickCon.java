@@ -1,23 +1,23 @@
 package mrriegel.qucra;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 import mrriegel.crunch.helper.InventoryHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerHopper;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.input.Keyboard;
-
-import cpw.mods.fml.common.FMLCommonHandler;
 
 public class QuickCon extends Container {
 	private class HandySlot extends Slot {
@@ -56,8 +56,8 @@ public class QuickCon extends Container {
 	int trueSize;
 	int position;
 	int maxPosition;
-
-	int lastUpdate;
+	boolean shift;
+	boolean control;
 
 	public QuickCon(EntityPlayer player, InventoryPlayer playerInv, QuickInv inv) {
 		this.player = player;
@@ -108,7 +108,7 @@ public class QuickCon extends Container {
 
 	private ItemStack click(int index, EntityPlayer player) {
 		boolean done = false;
-		if (insertByproduct(getSlot(index).getStack(), player, true)
+		if (insert(player.inventory, getSlot(index).getStack(), true, true)
 				&& (player.inventory.getItemStack() == null || (InventoryHelper
 						.areStacksEqual(player.inventory.getItemStack(),
 								getSlot(index).getStack(), false) && getSlot(
@@ -116,7 +116,8 @@ public class QuickCon extends Container {
 						+ player.inventory.getItemStack().stackSize <= getSlot(
 							index).getStack().getMaxStackSize()))) {
 			done = consumeItems(getSlot(index).getStack(), player, false)
-					&& insertByproduct(getSlot(index).getStack(), player, false);
+					&& insert(player.inventory, getSlot(index).getStack(),
+							false, true);
 		}
 		return done ? super.slotClick(index, 0, 0, player) : null;
 	}
@@ -125,14 +126,12 @@ public class QuickCon extends Container {
 		boolean done = false;
 		if (player.inventory.getItemStack() != null)
 			return null;
-		if (InventoryHelper.insert(player.inventory, getSlot(index).getStack(),
-				true)
-				&& insertByproduct(getSlot(index).getStack(), player, true)
-				&& consumeItems(getSlot(index).getStack(), player, true))
-			done = InventoryHelper.insert(player.inventory, getSlot(index)
-					.getStack(), false)
-					&& consumeItems(getSlot(index).getStack(), player, false)
-					&& insertByproduct(getSlot(index).getStack(), player, false);
+		if (insert(player.inventory, getSlot(index).getStack(), true, false)
+				&& consumeItems(getSlot(index).getStack(), player, true)) {
+			done = insert(player.inventory, getSlot(index).getStack(), false,
+					false)
+					&& consumeItems(getSlot(index).getStack(), player, false);
+		}
 		return done ? getSlot(index).getStack().copy() : null;
 	}
 
@@ -140,13 +139,9 @@ public class QuickCon extends Container {
 		int done = 0;
 		if (player.inventory.getItemStack() != null)
 			return null;
-		while (InventoryHelper.insert(player.inventory, getSlot(index)
-				.getStack(), true)
-				&& insertByproduct(getSlot(index).getStack(), player, true)
+		while (insert(player.inventory, getSlot(index).getStack(), true, false)
 				&& consumeItems(getSlot(index).getStack(), player, true)) {
-			InventoryHelper.insert(player.inventory, getSlot(index).getStack(),
-					false);
-			insertByproduct(getSlot(index).getStack(), player, false);
+			insert(player.inventory, getSlot(index).getStack(), false, false);
 			consumeItems(getSlot(index).getStack(), player, false);
 			done++;
 		}
@@ -155,60 +150,86 @@ public class QuickCon extends Container {
 		return done != 0 ? getSlot(index).getStack().copy() : null;
 	}
 
-	public boolean consumeItems(ItemStack stack, EntityPlayer player,
+	private boolean consumeItems(ItemStack stack, EntityPlayer player,
 			boolean simulate) {
 		for (IRecipe r : CraftingLogic.getRecipes(stack)) {
 			boolean trueMatch = CraftingLogic.match(r, player, true);
-			if (trueMatch && !simulate)
+			if (trueMatch && !simulate) {
 				return CraftingLogic.match(r, player, false);
-			else if (trueMatch && simulate)
+			} else if (trueMatch && simulate) {
 				return true;
+			}
 		}
 		return false;
 	}
 
-	public boolean insertByproduct(ItemStack stack, EntityPlayer player,
-			boolean simulate) {
-		if (!stack.getItem().hasContainerItem(stack))
-			return true;
-		//FAAAALLLLSSSCCH
-		for (IRecipe r : CraftingLogic.getRecipes(stack)) {
-			boolean trueMatch = InventoryHelper.insert(player.inventory, stack
-					.getItem().getContainerItem(stack), true);
-			if (trueMatch && !simulate)
-				return InventoryHelper.insert(player.inventory, stack.getItem()
-						.getContainerItem(stack), false);
-			else if (trueMatch && simulate)
+	private boolean insert(IInventory inv, ItemStack stacko, boolean simulate,
+			boolean onlyBy) {
+		for (IRecipe recipe : CraftingLogic.getRecipes(stacko)) {
+			ArrayList<ItemStack> ss = new ArrayList<ItemStack>();
+			if (!onlyBy)
+				ss.add(stacko);
+			ArrayList<Object> soll = null;
+			if (recipe instanceof ShapelessRecipes) {
+				soll = new ArrayList<Object>(
+						((ShapelessRecipes) recipe).recipeItems);
+			} else if (recipe instanceof ShapelessOreRecipe) {
+				soll = new ArrayList<Object>(
+						((ShapelessOreRecipe) recipe).getInput());
+			} else if (recipe instanceof ShapedRecipes) {
+				soll = new ArrayList<Object>(
+						Arrays.asList((((ShapedRecipes) recipe).recipeItems)));
+				soll.removeAll(Collections.singleton(null));
+			} else if (recipe instanceof ShapedOreRecipe) {
+				soll = new ArrayList<Object>(
+						Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
+				soll.removeAll(Collections.singleton(null));
+			}
+
+			for (Object o : soll) {
+				if (o instanceof ItemStack) {
+					ItemStack stack = (ItemStack) o;
+					if (!stack.getItem().hasContainerItem(stack))
+						continue;
+					ss.add(stack.getItem().getContainerItem(stack));
+				} else if (o instanceof ArrayList) {
+					ItemStack stack = (ItemStack) ((ArrayList) o).get(0);
+					if (!stack.getItem().hasContainerItem(stack))
+						continue;
+					ss.add(stack.getItem().getContainerItem(stack));
+				}
+			}
+			if (InventoryHelper.insert(inv, ss, simulate))
 				return true;
+
 		}
 		return false;
+
 	}
 
 	@Override
 	public ItemStack slotClick(int index, int key, int shift,
 			EntityPlayer player) {
-		boolean changed = false;
+		if (player.worldObj.isRemote) {
+			this.shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
+			this.control = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
+			PacketHandler.INSTANCE.sendToServer(new KeyMessage(this.shift,
+					this.control));
+		}
+
 		ItemStack ss = null;
-		if (index >= 0 && index <= 62 && key == 0
+		if (index >= 0 && index < 63 && key == 0
 				&& getSlot(index).getHasStack()) {
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+			if (this.shift) {
 				ss = clickShift(index, player);
-				if (ss != null)
-					changed = true;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+			} else if (this.control) {
 				ss = clickControl(index, player);
-				if (ss != null)
-					changed = true;
 			} else {
 				ss = click(index, player);
-				if (ss != null)
-					changed = true;
 			}
 		} else if (((index >= 63 && index < inventorySlots.size()) || index == -999)
 				&& shift != 1) {
 			ss = super.slotClick(index, key, shift, player);
-			if (ss != null)
-				changed = true;
 		}
 
 		updateContainer(player, inv);
@@ -217,7 +238,7 @@ public class QuickCon extends Container {
 
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-		throw new IllegalStateException(String.valueOf(slot));
+		throw new UnsupportedOperationException("Please make a bug report");
 	}
 
 	public void updateContainer(EntityPlayer player, QuickInv inv) {

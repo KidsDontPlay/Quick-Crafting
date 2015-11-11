@@ -1,11 +1,10 @@
 package mrriegel.crunch.helper;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
+import mrriegel.crunch.inventory.InventoryCopy;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -61,6 +60,25 @@ public class InventoryHelper {
 			return true;
 		}
 		return false;
+	}
+
+	public static boolean insert(IInventory inv, ArrayList<ItemStack> is,
+			boolean simulate) {
+		if (simulate) {
+			InventoryCopy cp = new InventoryCopy(inv);
+			for (ItemStack s : is) {
+				if (!insert(cp, s.copy(), false))
+					return false;
+			}
+		} else if (!simulate)
+			if (insert(inv, is, !simulate)) {
+				for (ItemStack s : is) {
+					if (!insert(inv, s.copy(), false))
+						return false;
+				}
+			} else
+				return false;
+		return true;
 	}
 
 	private static int findEmptySlot(IInventory inv) {

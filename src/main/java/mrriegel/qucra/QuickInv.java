@@ -2,6 +2,7 @@ package mrriegel.qucra;
 
 import java.util.ArrayList;
 
+import mrriegel.crunch.inventory.CrunchItemInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;

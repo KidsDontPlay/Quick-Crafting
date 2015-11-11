@@ -1,10 +1,9 @@
 package mrriegel.crunch.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
 
 /**
  * Creates a copy of an IInventory for extended simulation
@@ -14,13 +13,12 @@ import net.minecraft.util.IChatComponent;
  * Stolen from chicken bones
  */
 public class InventoryCopy implements IInventory {
-	public boolean[] accessible;
 	public ItemStack[] items;
 	public IInventory inv;
 
 	public InventoryCopy(IInventory inv) {
-		items = new ItemStack[inv.getSizeInventory()];
-		accessible = new boolean[inv.getSizeInventory()];
+		items = new ItemStack[inv.getSizeInventory()
+				- ((inv instanceof InventoryPlayer) ? 4 : 0)];
 		this.inv = inv;
 		update();
 	}
@@ -43,6 +41,7 @@ public class InventoryCopy implements IInventory {
 		return items[slot];
 	}
 
+	@Override
 	public ItemStack decrStackSize(int slot, int amount) {
 		return inv.decrStackSize(slot, amount);
 	}

@@ -1,32 +1,17 @@
 package mrriegel.qucra;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
-import com.google.common.eventbus.Subscribe;
-
-import mrriegel.crunch.helper.InventoryHelper;
-import mrriegel.crunch.inventory.InventoryCopy;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
@@ -41,10 +26,10 @@ public class QuickCrafting {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		File configFile = event.getSuggestedConfigurationFile();
-		ConfigurationHandler.config = new Configuration(configFile);
-		ConfigurationHandler.config.load();
-		ConfigurationHandler.refreshConfig();
+		// File configFile = event.getSuggestedConfigurationFile();
+		// ConfigurationHandler.config = new Configuration(configFile);
+		// ConfigurationHandler.config.load();
+		// ConfigurationHandler.refreshConfig();
 		PacketHandler.init();
 	}
 
@@ -57,10 +42,9 @@ public class QuickCrafting {
 				ItemQuickTable.qt);
 		GameRegistry.addShapelessRecipe(new ItemStack(ItemQuickTable.qt),
 				BlockQuickTable.qt);
-	}
-
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
+		GameRegistry.addShapedRecipe(new ItemStack(BlockQuickTable.qt), "cic",
+				"iki", "cic", 'c', Blocks.crafting_table, 'i',
+				Items.iron_ingot, 'k', Blocks.coal_block);
 	}
 
 }
