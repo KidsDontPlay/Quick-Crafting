@@ -33,13 +33,13 @@ public class QuickGui extends GuiContainer {
 		super.handleMouseInput();
 		if (Mouse.getX() > ((width - xSize) + 12)
 				&& Mouse.getX() < ((width + xSize) - 12)
-				&& Mouse.getY() > ((height - ySize) + 170)
-				&& Mouse.getY() < ((height + ySize) - 6)) {
+				&& Mouse.getY() > ((height - ySize) + 169)
+				&& Mouse.getY() < ((height + ySize) - 8)) {
 			int mouse = Mouse.getEventDWheel();
 			if (mouse == 0)
 				return;
 			QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
-//			con.arrange(mouse);
+			con.arrange(mouse);
 			PacketHandler.INSTANCE.sendToServer(new ScrollMessage(mouse));
 		}
 

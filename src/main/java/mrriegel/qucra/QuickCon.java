@@ -1,19 +1,23 @@
 package mrriegel.qucra;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import mrriegel.crunch.helper.InventoryHelper;
-import net.minecraft.block.BlockChest;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerHopper;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 
 import org.lwjgl.input.Keyboard;
+
+import cpw.mods.fml.common.FMLCommonHandler;
 
 public class QuickCon extends Container {
 	private class HandySlot extends Slot {
@@ -27,14 +31,6 @@ public class QuickCon extends Container {
 		public boolean isItemValid(ItemStack p_75214_1_) {
 			return false;
 		}
-
-		// @Override
-		// public void onSlotChanged() {
-		// super.onSlotChanged();
-		// if (change) {
-		// updateContainer(player, inv);
-		// }
-		// }
 	}
 
 	private class UpdateSlot extends Slot {
@@ -47,20 +43,19 @@ public class QuickCon extends Container {
 		@Override
 		public void onSlotChanged() {
 			super.onSlotChanged();
-			if (change) {
-				updateContainer(player, inv);
-			}
+			updateContainer(player, inv);
+
 		}
 
 	}
 
 	QuickInv inv;
 	EntityPlayer player;
+	ArrayList<ItemStack> craftInventory;
+	String lastInv;
 	int trueSize;
 	int position;
 	int maxPosition;
-
-	boolean change = false;
 
 	int lastUpdate;
 
@@ -84,9 +79,18 @@ public class QuickCon extends Container {
 		for (int i = 0; i < 9; i++) {
 			addSlotToContainer(new UpdateSlot(playerInv, i, 12 + i * 18, 196));
 		}
-		ArrayList<ItemStack> al = CraftingLogic.getCraftableStack(player);
-		trueSize = al.size();
+		craftInventory = CraftingLogic.getCraftableStack(player);
+		lastInv = playerInv(player);
+		trueSize = craftInventory.size();
 		maxPosition = trueSize < 64 ? 0 : ((trueSize - 1) / 9) - 6;
+	}
+
+	private String playerInv(EntityPlayer player) {
+		String f = "";
+		for (int i = 0; i < player.inventory.getSizeInventory() - 4; i++)
+			if (player.inventory.getStackInSlot(i) != null)
+				f += player.inventory.getStackInSlot(i).toString();
+		return f;
 	}
 
 	public void arrange(int i) {
@@ -95,8 +99,6 @@ public class QuickCon extends Container {
 		else if (i > 0 && position > 0)
 			position -= 1;
 		updateContainer(player, inv);
-		// for (Object o : inventorySlots)
-		// ((Slot) o).onSlotChanged();
 	}
 
 	@Override
@@ -106,27 +108,31 @@ public class QuickCon extends Container {
 
 	private ItemStack click(int index, EntityPlayer player) {
 		boolean done = false;
-		if (player.inventory.getItemStack() == null
-				|| (InventoryHelper.areStacksEqual(player.inventory
-						.getItemStack(), getSlot(index).getStack(), false) && getSlot(
+		if (insertByproduct(getSlot(index).getStack(), player, true)
+				&& (player.inventory.getItemStack() == null || (InventoryHelper
+						.areStacksEqual(player.inventory.getItemStack(),
+								getSlot(index).getStack(), false) && getSlot(
 						index).getStack().stackSize
 						+ player.inventory.getItemStack().stackSize <= getSlot(
-							index).getStack().getMaxStackSize())) {
-			done = consumeItems(getSlot(index).getStack(), player, false);
+							index).getStack().getMaxStackSize()))) {
+			done = consumeItems(getSlot(index).getStack(), player, false)
+					&& insertByproduct(getSlot(index).getStack(), player, false);
 		}
 		return done ? super.slotClick(index, 0, 0, player) : null;
 	}
 
 	private ItemStack clickControl(int index, EntityPlayer player) {
-		System.out.println("stack: " + getSlot(index).getStack());
 		boolean done = false;
 		if (player.inventory.getItemStack() != null)
 			return null;
 		if (InventoryHelper.insert(player.inventory, getSlot(index).getStack(),
-				true) && consumeItems(getSlot(index).getStack(), player, true))
+				true)
+				&& insertByproduct(getSlot(index).getStack(), player, true)
+				&& consumeItems(getSlot(index).getStack(), player, true))
 			done = InventoryHelper.insert(player.inventory, getSlot(index)
 					.getStack(), false)
-					&& consumeItems(getSlot(index).getStack(), player, false);
+					&& consumeItems(getSlot(index).getStack(), player, false)
+					&& insertByproduct(getSlot(index).getStack(), player, false);
 		return done ? getSlot(index).getStack().copy() : null;
 	}
 
@@ -136,9 +142,11 @@ public class QuickCon extends Container {
 			return null;
 		while (InventoryHelper.insert(player.inventory, getSlot(index)
 				.getStack(), true)
+				&& insertByproduct(getSlot(index).getStack(), player, true)
 				&& consumeItems(getSlot(index).getStack(), player, true)) {
 			InventoryHelper.insert(player.inventory, getSlot(index).getStack(),
 					false);
+			insertByproduct(getSlot(index).getStack(), player, false);
 			consumeItems(getSlot(index).getStack(), player, false);
 			done++;
 		}
@@ -159,11 +167,26 @@ public class QuickCon extends Container {
 		return false;
 	}
 
+	public boolean insertByproduct(ItemStack stack, EntityPlayer player,
+			boolean simulate) {
+		if (!stack.getItem().hasContainerItem(stack))
+			return true;
+		//FAAAALLLLSSSCCH
+		for (IRecipe r : CraftingLogic.getRecipes(stack)) {
+			boolean trueMatch = InventoryHelper.insert(player.inventory, stack
+					.getItem().getContainerItem(stack), true);
+			if (trueMatch && !simulate)
+				return InventoryHelper.insert(player.inventory, stack.getItem()
+						.getContainerItem(stack), false);
+			else if (trueMatch && simulate)
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public ItemStack slotClick(int index, int key, int shift,
 			EntityPlayer player) {
-		System.out.println("slot: " + index + ", zwei: " + key + ", drei: "
-				+ shift);
 		boolean changed = false;
 		ItemStack ss = null;
 		if (index >= 0 && index <= 62 && key == 0
@@ -187,9 +210,8 @@ public class QuickCon extends Container {
 			if (ss != null)
 				changed = true;
 		}
-		System.out.println("end " + ss);
-		if (changed || !change)
-			updateContainer(player, inv);
+
+		updateContainer(player, inv);
 		return ss;
 	}
 
@@ -199,21 +221,23 @@ public class QuickCon extends Container {
 	}
 
 	public void updateContainer(EntityPlayer player, QuickInv inv) {
-		ArrayList<ItemStack> al = CraftingLogic.getCraftableStack(player);
-		trueSize = al.size();
+		if (!lastInv.equals(playerInv(player))) {
+			craftInventory = CraftingLogic.getCraftableStack(player);
+			lastInv = playerInv(player);
+		}
+
+		trueSize = craftInventory.size();
 		maxPosition = trueSize < 64 ? 0 : ((trueSize - 1) / 9) - 6;
 		if (position > maxPosition)
 			position = maxPosition;
+
 		for (int i = 0; i < 63; i++) {
-			if ((i + position * 9) < al.size())
-				inv.setInventorySlotContents(i, al.get(i + position * 9));
-			else
+			if ((i + position * 9) < craftInventory.size()) {
+				inv.setInventorySlotContents(i,
+						craftInventory.get(i + position * 9).copy());
+			} else {
 				inv.setInventorySlotContents(i, null);
-
+			}
 		}
-		putStacksInSlots(inv.getInv());
-
-		if (!change)
-			change = true;
 	}
 }
