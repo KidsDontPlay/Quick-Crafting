@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import mrriegel.crunch.helper.InventoryHelper;
+import mrriegel.qucra.inventory.InventoryHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -246,7 +246,6 @@ public class QuickCon extends Container {
 			craftInventory = CraftingLogic.getCraftableStack(player);
 			lastInv = playerInv(player);
 		}
-
 		trueSize = craftInventory.size();
 		maxPosition = trueSize < 64 ? 0 : ((trueSize - 1) / 9) - 6;
 		if (position > maxPosition)

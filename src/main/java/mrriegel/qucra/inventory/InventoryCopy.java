@@ -1,4 +1,4 @@
-package mrriegel.crunch.inventory;
+package mrriegel.qucra.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

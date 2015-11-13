@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import mrriegel.crunch.helper.InventoryHelper;
-import mrriegel.crunch.inventory.InventoryCopy;
+import mrriegel.qucra.inventory.InventoryCopy;
+import mrriegel.qucra.inventory.InventoryHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
