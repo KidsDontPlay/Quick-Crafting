@@ -1,6 +1,5 @@
-package mrriegel.crunch.inventory;
+package mrriegel.qucra.inventory;
 
-import mrriegel.crunch.helper.InventoryHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;

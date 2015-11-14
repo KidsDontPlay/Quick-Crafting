@@ -13,5 +13,7 @@ public class PacketHandler {
 				id++, Side.SERVER);
 		INSTANCE.registerMessage(KeyMessage.class, KeyMessage.class,
 				id++, Side.SERVER);
+		INSTANCE.registerMessage(SearchMessage.class, SearchMessage.class,
+ 				id++, Side.SERVER);
 	}
 }

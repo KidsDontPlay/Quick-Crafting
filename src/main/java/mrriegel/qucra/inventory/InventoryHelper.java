@@ -1,8 +1,7 @@
-package mrriegel.crunch.helper;
+package mrriegel.qucra.inventory;
 
 import java.util.ArrayList;
 
-import mrriegel.crunch.inventory.InventoryCopy;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
