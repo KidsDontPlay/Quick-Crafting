@@ -56,6 +56,7 @@ public class QuickCon extends Container {
 	int trueSize;
 	int position;
 	int maxPosition;
+	String search;
 	boolean shift;
 	boolean control;
 
@@ -83,6 +84,7 @@ public class QuickCon extends Container {
 		lastInv = playerInv(player);
 		trueSize = craftInventory.size();
 		maxPosition = trueSize < 64 ? 0 : ((trueSize - 1) / 9) - 6;
+		search = "";
 	}
 
 	private String playerInv(EntityPlayer player) {
@@ -91,6 +93,14 @@ public class QuickCon extends Container {
 			if (player.inventory.getStackInSlot(i) != null)
 				f += player.inventory.getStackInSlot(i).toString();
 		return f;
+	}
+
+	public String getSearch() {
+		return search;
+	}
+
+	public void setSearch(String search) {
+		this.search = search;
 	}
 
 	public void arrange(int i) {
@@ -246,15 +256,23 @@ public class QuickCon extends Container {
 			craftInventory = CraftingLogic.getCraftableStack(player);
 			lastInv = playerInv(player);
 		}
-		trueSize = craftInventory.size();
+
+		ArrayList<ItemStack> tmp = search.equals("") ? new ArrayList<ItemStack>(
+				craftInventory) : new ArrayList<ItemStack>();
+		if (!search.equals("")) {
+			for (ItemStack s : craftInventory)
+				if (s.getDisplayName().toLowerCase()
+						.contains(search.toLowerCase()))
+					tmp.add(s);
+		}
+		trueSize = tmp.size();
 		maxPosition = trueSize < 64 ? 0 : ((trueSize - 1) / 9) - 6;
 		if (position > maxPosition)
 			position = maxPosition;
-
 		for (int i = 0; i < 63; i++) {
-			if ((i + position * 9) < craftInventory.size()) {
-				inv.setInventorySlotContents(i,
-						craftInventory.get(i + position * 9).copy());
+			if ((i + position * 9) < tmp.size()) {
+				inv.setInventorySlotContents(i, tmp.get(i + position * 9)
+						.copy());
 			} else {
 				inv.setInventorySlotContents(i, null);
 			}
