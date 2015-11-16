@@ -13,12 +13,13 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 @Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
-	public static final String VERSION = "1.8-1.0";
+	public static final String VERSION = "1.8-1.1";
 	public static final String MODNAME = "QuickCrafting";
 
 	@Instance(QuickCrafting.MODID)
@@ -47,24 +48,26 @@ public class QuickCrafting {
 				Items.iron_ingot, 'k', Blocks.coal_block);
 		GameRegistry.addRecipe(new ShapelessOreRecipe(Blocks.gold_block,
 				Items.redstone, Items.apple));
-		Minecraft
-				.getMinecraft()
-				.getRenderItem()
-				.getItemModelMesher()
-				.register(
-						ItemQuickTable.qt,
-						0,
-						new ModelResourceLocation(QuickCrafting.MODID + ":"
-								+ "quickTableItem", "inventory"));
-		Minecraft
-				.getMinecraft()
-				.getRenderItem()
-				.getItemModelMesher()
-				.register(
-						Item.getItemFromBlock(BlockQuickTable.qt),
-						0,
-						new ModelResourceLocation(QuickCrafting.MODID + ":"
-								+ "quickTableBlock", "inventory"));
+		if (event.getSide() == Side.CLIENT) {
+			Minecraft
+					.getMinecraft()
+					.getRenderItem()
+					.getItemModelMesher()
+					.register(
+							ItemQuickTable.qt,
+							0,
+							new ModelResourceLocation(QuickCrafting.MODID + ":"
+									+ "quickTableItem", "inventory"));
+			Minecraft
+					.getMinecraft()
+					.getRenderItem()
+					.getItemModelMesher()
+					.register(
+							Item.getItemFromBlock(BlockQuickTable.qt),
+							0,
+							new ModelResourceLocation(QuickCrafting.MODID + ":"
+									+ "quickTableBlock", "inventory"));
+		}
 	}
 
 }
