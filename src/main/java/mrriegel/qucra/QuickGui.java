@@ -3,7 +3,13 @@ package mrriegel.qucra;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
@@ -25,7 +31,7 @@ public class QuickGui extends GuiContainer {
 	public void initGui() {
 		super.initGui();
 		Keyboard.enableRepeatEvents(true);
-		searchBar = new GuiTextField(fontRendererObj, guiLeft + 86, guiTop -6,
+		searchBar = new GuiTextField(fontRendererObj, guiLeft + 86, guiTop - 6,
 				85, fontRendererObj.FONT_HEIGHT);
 		searchBar.setMaxStringLength(14);
 		searchBar.setEnableBackgroundDrawing(false);
@@ -35,6 +41,29 @@ public class QuickGui extends GuiContainer {
 		searchBar.setFocused(true);
 	}
 
+	// @Override
+	// public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+	// {
+	// super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+	// if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)
+	// && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL))
+	// drawAnimation((Slot) inventorySlots.inventorySlots.get(63));
+	//
+	// }
+
+	// private void drawAnimation(Slot x) {
+	// GL11.glDisable(GL11.GL_LIGHTING);
+	// GL11.glDisable(GL11.GL_DEPTH_TEST);
+	// int j1 = x.xDisplayPosition + guiLeft;
+	// int k1 = x.yDisplayPosition + guiTop;
+	// GL11.glColorMask(true, true, true, false);
+	// this.drawGradientRect(j1, k1, j1 + 16, k1 + 16, -2130706433,
+	// -2130706433);
+	// GL11.glColorMask(true, true, true, true);
+	// GL11.glEnable(GL11.GL_LIGHTING);
+	// GL11.glEnable(GL11.GL_DEPTH_TEST);
+	// }
+
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float p_146976_1_,
 			int p_146976_2_, int p_146976_3_) {
@@ -43,8 +72,9 @@ public class QuickGui extends GuiContainer {
 		int k = (width - xSize) / 2;
 		int l = (height - ySize) / 2;
 		drawTexturedModalRect(k, l, 0, 0, xSize, ySize);
-		drawTexturedModalRect(k+62, l-14, 0, 220, 122, 19);
+		drawTexturedModalRect(k + 62, l - 14, 0, 220, 122, 19);
 		searchBar.drawTextBox();
+
 	}
 
 	@Override

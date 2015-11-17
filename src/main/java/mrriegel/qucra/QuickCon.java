@@ -1,5 +1,7 @@
 package mrriegel.qucra;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -194,15 +196,24 @@ public class QuickCon extends Container {
 				soll = new ArrayList<Object>(
 						Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
 				soll.removeAll(Collections.singleton(null));
+			} else {
+				ArrayList<Object> tmp = findInvoke1(recipe, soll);
+				// if (tmp == null || tmp.size() == 0)
+				// tmp = findInvoke2(r, soll);
+				if (tmp != null && tmp.size() > 0) {
+					soll = new ArrayList<Object>(tmp);
+					soll.removeAll(Collections.singleton(null));
+				}
 			}
-
+			if (soll == null || soll.size() == 0)
+				return false;
 			for (Object o : soll) {
 				if (o instanceof ItemStack) {
 					ItemStack stack = (ItemStack) o;
 					if (!stack.getItem().hasContainerItem(stack))
 						continue;
 					ss.add(stack.getItem().getContainerItem(stack));
-				} else if (o instanceof ArrayList) {
+				} else if (o instanceof ArrayList /* && !((ArrayList) o).isEmpty() */) {
 					ItemStack stack = (ItemStack) ((ArrayList) o).get(0);
 					if (!stack.getItem().hasContainerItem(stack))
 						continue;
@@ -215,6 +226,44 @@ public class QuickCon extends Container {
 		}
 		return false;
 
+	}
+
+	private static ArrayList<Object> findInvoke1(IRecipe r,
+			ArrayList<Object> soll) {
+		Method m = null;
+		Object[] fin = null;
+		try {
+			m = r.getClass().getMethod("getInput", (Class<?>[]) null);
+		} catch (NoSuchMethodException e) {
+			return null;
+		} catch (SecurityException e) {
+			return null;
+		}
+		if (m == null)
+			return null;
+
+		try {
+			fin = (Object[]) m.invoke(r, (Object[]) null);
+		} catch (ClassCastException e) {
+		} catch (IllegalAccessException e) {
+			return null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		} catch (InvocationTargetException e) {
+			return null;
+		}
+		if (fin == null)
+			return null;
+		ArrayList<Object> res = new ArrayList<Object>();
+		for (Object o : fin) {
+			if (o instanceof ItemStack) {
+				res.add(o);
+			} else if (o instanceof ArrayList && !((ArrayList) o).isEmpty()
+					&& ((ArrayList) o).get(0) instanceof ItemStack) {
+				res.add(o);
+			}
+		}
+		return res;
 	}
 
 	@Override
