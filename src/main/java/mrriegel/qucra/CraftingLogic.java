@@ -47,11 +47,19 @@ public class CraftingLogic {
 	public static ArrayList<ItemStack> getCraftableStack(EntityPlayer player) {
 		ArrayList<ItemStack> lis = new ArrayList<ItemStack>();
 		for (Object o : CraftingManager.getInstance().getRecipeList()) {
-			if (match((IRecipe) o, player, true)) {
+			if (match((IRecipe) o, player, true)
+					&& checkIn(lis, ((IRecipe) o).getRecipeOutput())) {
 				lis.add(((IRecipe) o).getRecipeOutput().copy());
 			}
 		}
 		return lis;
+	}
+
+	private static boolean checkIn(ArrayList<ItemStack> lis, ItemStack stack) {
+		for (ItemStack s : lis)
+			if (InventoryHelper.areStacksEqual(stack, s, false))
+				return false;
+		return true;
 	}
 
 	public static ArrayList<IRecipe> getRecipes(ItemStack stack) {
@@ -66,18 +74,17 @@ public class CraftingLogic {
 	}
 
 	public static boolean contains(Object o, IInventory inv) {
-		for (int i = 0; i < inv.getSizeInventory(); i++)
-			if (o instanceof ItemStack) {
-				return InventoryHelper.consumeInventoryItem(inv, (ItemStack) o,
-						1);
-			} else if (o instanceof Collection) {
-				for (Object obj : (Collection) o) {
-					ItemStack stack = (ItemStack) obj;
-					if (InventoryHelper.consumeInventoryItem(inv, stack, 1)) {
-						return true;
-					}
+		// for (int i = 0; i < inv.getSizeInventory(); i++)
+		if (o instanceof ItemStack) {
+			return InventoryHelper.consumeInventoryItem(inv, (ItemStack) o, 1);
+		} else if (o instanceof Collection) {
+			for (Object obj : (Collection) o) {
+				ItemStack stack = (ItemStack) obj;
+				if (InventoryHelper.consumeInventoryItem(inv, stack, 1)) {
+					return true;
 				}
 			}
+		}
 		return false;
 	}
 }

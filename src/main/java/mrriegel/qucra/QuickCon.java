@@ -194,8 +194,11 @@ public class QuickCon extends Container {
 				soll = new ArrayList<Object>(
 						Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
 				soll.removeAll(Collections.singleton(null));
-			}
-
+			} else
+				return false;
+			
+			if (soll == null || soll.size() == 0)
+				return false;
 			for (Object o : soll) {
 				if (o instanceof ItemStack) {
 					ItemStack stack = (ItemStack) o;
