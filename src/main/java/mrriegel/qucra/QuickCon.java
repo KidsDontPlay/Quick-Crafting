@@ -21,6 +21,12 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.input.Keyboard;
 
+import appeng.api.exceptions.MissingIngredientError;
+import appeng.api.exceptions.RegistrationError;
+import appeng.api.recipes.IIngredient;
+import appeng.recipes.game.ShapedRecipe;
+import appeng.recipes.game.ShapelessRecipe;
+
 public class QuickCon extends Container {
 	private class HandySlot extends Slot {
 
@@ -196,10 +202,38 @@ public class QuickCon extends Container {
 				soll = new ArrayList<Object>(
 						Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
 				soll.removeAll(Collections.singleton(null));
+			} else if (recipe instanceof ShapedRecipe) {
+				ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
+				for (Object o : ((ShapedRecipe) recipe).getIngredients()) {
+					if (o != null) {
+						try {
+							tmp.add(new ArrayList(
+									Arrays.asList(((IIngredient) o)
+											.getItemStackSet())));
+						} catch (RegistrationError e) {
+						} catch (MissingIngredientError e) {
+						}
+					}
+				}
+				soll = new ArrayList<Object>(tmp);
+				soll.removeAll(Collections.singleton(null));
+			} else if (recipe instanceof ShapelessRecipe) {
+				ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
+				for (Object o : ((ShapelessRecipe) recipe).getInput()) {
+					if (o != null) {
+						try {
+							tmp.add(new ArrayList(
+									Arrays.asList(((IIngredient) o)
+											.getItemStackSet())));
+						} catch (RegistrationError e) {
+						} catch (MissingIngredientError e) {
+						}
+					}
+				}
+				soll = new ArrayList<Object>(tmp);
+				soll.removeAll(Collections.singleton(null));
 			} else {
 				ArrayList<Object> tmp = findInvoke1(recipe, soll);
-				// if (tmp == null || tmp.size() == 0)
-				// tmp = findInvoke2(r, soll);
 				if (tmp != null && tmp.size() > 0) {
 					soll = new ArrayList<Object>(tmp);
 					soll.removeAll(Collections.singleton(null));
