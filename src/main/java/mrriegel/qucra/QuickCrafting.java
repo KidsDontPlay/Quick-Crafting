@@ -1,11 +1,14 @@
 package mrriegel.qucra;
 
+import java.io.File;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -19,7 +22,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 @Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
-	public static final String VERSION = "1.8-1.2";
+	public static final String VERSION = "1.8-1.3";
 	public static final String MODNAME = "QuickCrafting";
 
 	@Instance(QuickCrafting.MODID)
@@ -27,10 +30,10 @@ public class QuickCrafting {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		// File configFile = event.getSuggestedConfigurationFile();
-		// ConfigurationHandler.config = new Configuration(configFile);
-		// ConfigurationHandler.config.load();
-		// ConfigurationHandler.refreshConfig();
+		File configFile = event.getSuggestedConfigurationFile();
+		ConfigurationHandler.config = new Configuration(configFile);
+		ConfigurationHandler.config.load();
+		ConfigurationHandler.refreshConfig();
 		PacketHandler.init();
 	}
 

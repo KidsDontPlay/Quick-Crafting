@@ -11,9 +11,9 @@ public class PacketHandler {
 		int id = 0;
 		INSTANCE.registerMessage(ScrollMessage.class, ScrollMessage.class,
 				id++, Side.SERVER);
-		INSTANCE.registerMessage(KeyMessage.class, KeyMessage.class,
-				id++, Side.SERVER);
+		INSTANCE.registerMessage(KeyMessage.class, KeyMessage.class, id++,
+				Side.SERVER);
 		INSTANCE.registerMessage(SearchMessage.class, SearchMessage.class,
- 				id++, Side.SERVER);
+				id++, Side.SERVER);
 	}
 }

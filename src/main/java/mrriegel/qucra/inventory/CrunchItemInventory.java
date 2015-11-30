@@ -30,6 +30,7 @@ public class CrunchItemInventory implements IInventory {
 		return inv;
 	}
 
+	@Override
 	public void clear() {
 		inv = new ItemStack[INVSIZE];
 	}
@@ -122,12 +123,12 @@ public class CrunchItemInventory implements IInventory {
 
 	@Override
 	public void openInventory(EntityPlayer player) {
-		
+
 	}
 
 	@Override
 	public void closeInventory(EntityPlayer player) {
-		
+
 	}
 
 	@Override
@@ -137,7 +138,7 @@ public class CrunchItemInventory implements IInventory {
 
 	@Override
 	public void setField(int id, int value) {
-		
+
 	}
 
 	@Override

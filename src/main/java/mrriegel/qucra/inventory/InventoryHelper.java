@@ -125,9 +125,11 @@ public class InventoryHelper {
 			return stack1.isItemEqual(stack2);
 		else
 			return stack1.isItemEqual(stack2)
-					&& ((stack1.getTagCompound() == null && stack2.getTagCompound() == null) || (stack1.getTagCompound() != null
-							&& stack2.getTagCompound() != null && stack1.getTagCompound()
-								.equals(stack2.getTagCompound())));
+					&& ((stack1.getTagCompound() == null && stack2
+							.getTagCompound() == null) || (stack1
+							.getTagCompound() != null
+							&& stack2.getTagCompound() != null && stack1
+							.getTagCompound().equals(stack2.getTagCompound())));
 	}
 
 	public static boolean IsEnoughPresent(IInventory inv, ItemStack stack,

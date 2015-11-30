@@ -3,6 +3,7 @@ package mrriegel.qucra;
 import java.io.IOException;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
@@ -16,6 +17,9 @@ public class QuickGui extends GuiContainer {
 	private static final ResourceLocation texture = new ResourceLocation(
 			QuickCrafting.MODID + ":" + "textures/gui/quick.png");
 	private GuiTextField searchBar;
+	int guiRight = guiLeft + this.xSize;
+	int guiBot = guiTop + this.ySize;
+	private GuiButton up, down;
 
 	public QuickGui(Container p_i1072_1_) {
 		super(p_i1072_1_);
@@ -35,6 +39,20 @@ public class QuickGui extends GuiContainer {
 		searchBar.setTextColor(16777215);
 		searchBar.setCanLoseFocus(false);
 		searchBar.setFocused(true);
+		up = new GuiButton(1, guiLeft - 22, guiTop + 5, 20, 20,
+				String.valueOf((char) 10224));
+		buttonList.add(up);
+		down = new GuiButton(-1, guiLeft - 22, guiTop + 30, 20, 20,
+				String.valueOf((char) 10225));
+		buttonList.add(down);
+	}
+
+	@Override
+	protected void actionPerformed(GuiButton p_146284_1_) {
+		QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
+		con.arrange(p_146284_1_.id);
+		PacketHandler.INSTANCE.sendToServer(new ScrollMessage(p_146284_1_.id));
+
 	}
 
 	@Override
@@ -42,10 +60,10 @@ public class QuickGui extends GuiContainer {
 			int p_146976_2_, int p_146976_3_) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(texture);
-		int k = (width - xSize) / 2;
-		int l = (height - ySize) / 2;
-		drawTexturedModalRect(k, l, 0, 0, xSize, ySize);
-		drawTexturedModalRect(k + 62, l - 14, 0, 220, 122, 19);
+		guiRight = guiLeft + this.xSize;
+		guiBot = guiTop + this.ySize;
+		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+		drawTexturedModalRect(guiLeft + 62, guiTop - 14, 0, 220, 122, 19);
 		searchBar.drawTextBox();
 	}
 
@@ -68,10 +86,11 @@ public class QuickGui extends GuiContainer {
 	@Override
 	public void handleMouseInput() throws IOException {
 		super.handleMouseInput();
-		if (Mouse.getX() > ((width - xSize) + 12)
-				&& Mouse.getX() < ((width + xSize) - 12)
-				&& Mouse.getY() > ((height - ySize) + 169)
-				&& Mouse.getY() < ((height + ySize) - 8)) {
+		int i = Mouse.getX() * this.width / this.mc.displayWidth;
+		int j = this.height - Mouse.getY() * this.height
+				/ this.mc.displayHeight - 1;
+		if (ConfigurationHandler.scroll && i > (guiLeft) && i < (guiRight)
+				&& j > (guiTop) && j < (guiBot)) {
 			int mouse = Mouse.getEventDWheel();
 			if (mouse == 0)
 				return;

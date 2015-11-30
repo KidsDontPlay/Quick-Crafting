@@ -196,7 +196,7 @@ public class QuickCon extends Container {
 				soll.removeAll(Collections.singleton(null));
 			} else
 				return false;
-			
+
 			if (soll == null || soll.size() == 0)
 				return false;
 			for (Object o : soll) {

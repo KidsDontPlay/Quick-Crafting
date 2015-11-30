@@ -1,6 +1,8 @@
 package mrriegel.qucra;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.util.IThreadListener;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -19,10 +21,18 @@ public class SearchMessage implements IMessage,
 	}
 
 	@Override
-	public IMessage onMessage(SearchMessage message, MessageContext ctx) {
-		QuickCon con = (QuickCon) ctx.getServerHandler().playerEntity.openContainer;
-		con.setSearch(message.s);
-		con.updateContainer(con.player, con.inv);
+	public IMessage onMessage(final SearchMessage message,
+			final MessageContext ctx) {
+		IThreadListener mainThread = (WorldServer) ctx.getServerHandler().playerEntity.worldObj;
+		mainThread.addScheduledTask(new Runnable() {
+			@Override
+			public void run() {
+				QuickCon con = (QuickCon) ctx.getServerHandler().playerEntity.openContainer;
+				con.setSearch(message.s);
+				con.updateContainer(con.player, con.inv);
+			}
+		});
+
 		return null;
 	}
 
