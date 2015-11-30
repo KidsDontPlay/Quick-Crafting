@@ -1,6 +1,7 @@
 package mrriegel.qucra;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
@@ -14,6 +15,9 @@ public class QuickGui extends GuiContainer {
 	private static final ResourceLocation texture = new ResourceLocation(
 			QuickCrafting.MODID + ":" + "textures/gui/quick.png");
 	private GuiTextField searchBar;
+	int guiRight = guiLeft + this.xSize;
+	int guiBot = guiTop + this.ySize;
+	private GuiButton up, down;
 
 	public QuickGui(Container p_i1072_1_) {
 		super(p_i1072_1_);
@@ -33,47 +37,37 @@ public class QuickGui extends GuiContainer {
 		searchBar.setTextColor(16777215);
 		searchBar.setCanLoseFocus(false);
 		searchBar.setFocused(true);
+		up = new GuiButton(1, guiLeft - 22, guiTop + 5, 20, 20, " "
+				+ String.valueOf((char) 10224));
+		buttonList.add(up);
+		down = new GuiButton(-1, guiLeft - 22, guiTop + 30, 20, 20, " "
+				+ String.valueOf((char) 10225));
+		buttonList.add(down);
 	}
 
-	// @Override
-	// public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
-	// {
-	// super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
-	// if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)
-	// && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL))
-	// drawAnimation((Slot) inventorySlots.inventorySlots.get(63));
-	//
-	// }
+	@Override
+	protected void actionPerformed(GuiButton p_146284_1_) {
+		QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
+		con.arrange(p_146284_1_.id);
+		PacketHandler.INSTANCE.sendToServer(new ScrollMessage(p_146284_1_.id));
 
-	// private void drawAnimation(Slot x) {
-	// GL11.glDisable(GL11.GL_LIGHTING);
-	// GL11.glDisable(GL11.GL_DEPTH_TEST);
-	// int j1 = x.xDisplayPosition + guiLeft;
-	// int k1 = x.yDisplayPosition + guiTop;
-	// GL11.glColorMask(true, true, true, false);
-	// this.drawGradientRect(j1, k1, j1 + 16, k1 + 16, -2130706433,
-	// -2130706433);
-	// GL11.glColorMask(true, true, true, true);
-	// GL11.glEnable(GL11.GL_LIGHTING);
-	// GL11.glEnable(GL11.GL_DEPTH_TEST);
-	// }
+	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float p_146976_1_,
 			int p_146976_2_, int p_146976_3_) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(texture);
-		int k = (width - xSize) / 2;
-		int l = (height - ySize) / 2;
-		drawTexturedModalRect(k, l, 0, 0, xSize, ySize);
-		drawTexturedModalRect(k + 62, l - 14, 0, 220, 122, 19);
+		guiRight = guiLeft + this.xSize;
+		guiBot = guiTop + this.ySize;
+		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+		drawTexturedModalRect(guiLeft + 62, guiTop - 14, 0, 220, 122, 19);
 		searchBar.drawTextBox();
 
 	}
 
 	@Override
 	protected void keyTyped(char p_73869_1_, int p_73869_2_) {
-
 		if (!this.checkHotbarKeys(p_73869_2_)) {
 			if (this.searchBar.textboxKeyTyped(p_73869_1_, p_73869_2_)) {
 				PacketHandler.INSTANCE.sendToServer(new SearchMessage(searchBar
@@ -90,10 +84,11 @@ public class QuickGui extends GuiContainer {
 	@Override
 	public void handleMouseInput() {
 		super.handleMouseInput();
-		if (Mouse.getX() > ((width - xSize) + 12)
-				&& Mouse.getX() < ((width + xSize) - 12)
-				&& Mouse.getY() > ((height - ySize) + 169)
-				&& Mouse.getY() < ((height + ySize) - 8)) {
+		int i = Mouse.getX() * this.width / this.mc.displayWidth;
+		int j = this.height - Mouse.getY() * this.height
+				/ this.mc.displayHeight - 1;
+		if (ConfigurationHandler.scroll && i > (guiLeft) && i < (guiRight)
+				&& j > (guiTop) && j < (guiBot)) {
 			int mouse = Mouse.getEventDWheel();
 			if (mouse == 0)
 				return;

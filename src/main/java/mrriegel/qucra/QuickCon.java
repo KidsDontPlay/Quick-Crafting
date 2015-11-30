@@ -303,6 +303,10 @@ public class QuickCon extends Container {
 	@Override
 	public ItemStack slotClick(int index, int key, int shift,
 			EntityPlayer player) {
+		// System.out.println("index; " + index + ", key: " + key + ", shift: "
+		// + shift);
+		// for (StackTraceElement s : Thread.currentThread().getStackTrace())
+		//		System.out.println(s);
 		if (player.worldObj.isRemote) {
 			this.shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
 			this.control = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
