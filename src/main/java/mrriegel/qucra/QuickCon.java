@@ -65,6 +65,7 @@ public class QuickCon extends Container {
 	int position;
 	int maxPosition;
 	String search;
+	IRecipe current;
 	boolean shift;
 	boolean control;
 
@@ -126,16 +127,18 @@ public class QuickCon extends Container {
 
 	private ItemStack click(int index, EntityPlayer player) {
 		boolean done = false;
-		if (insert(player.inventory, getSlot(index).getStack(), true, true)
+		if (consumeItems(getSlot(index).getStack().copy(), player, true)
+				&& insert(player.inventory, getSlot(index).getStack().copy(),
+						true, true)
 				&& (player.inventory.getItemStack() == null || (InventoryHelper
 						.areStacksEqual(player.inventory.getItemStack(),
-								getSlot(index).getStack(), false) && getSlot(
-						index).getStack().stackSize
+								getSlot(index).getStack().copy(), false) && getSlot(
+						index).getStack().copy().stackSize
 						+ player.inventory.getItemStack().stackSize <= getSlot(
-							index).getStack().getMaxStackSize()))) {
-			done = consumeItems(getSlot(index).getStack(), player, false)
-					&& insert(player.inventory, getSlot(index).getStack(),
-							false, true);
+							index).getStack().copy().getMaxStackSize()))) {
+			done = consumeItems(getSlot(index).getStack().copy(), player, false)
+					&& insert(player.inventory, getSlot(index).getStack()
+							.copy(), false, true);
 		}
 		return done ? super.slotClick(index, 0, 0, player) : null;
 	}
@@ -144,11 +147,12 @@ public class QuickCon extends Container {
 		boolean done = false;
 		if (player.inventory.getItemStack() != null)
 			return null;
-		if (insert(player.inventory, getSlot(index).getStack(), true, false)
-				&& consumeItems(getSlot(index).getStack(), player, true)) {
-			done = insert(player.inventory, getSlot(index).getStack(), false,
-					false)
-					&& consumeItems(getSlot(index).getStack(), player, false);
+		if (consumeItems(getSlot(index).getStack().copy(), player, true)
+				&& insert(player.inventory, getSlot(index).getStack().copy(),
+						true, false)) {
+			done = consumeItems(getSlot(index).getStack().copy(), player, false)
+					&& insert(player.inventory, getSlot(index).getStack()
+							.copy(), false, false);
 		}
 		return done ? getSlot(index).getStack().copy() : null;
 	}
@@ -157,10 +161,12 @@ public class QuickCon extends Container {
 		int done = 0;
 		if (player.inventory.getItemStack() != null)
 			return null;
-		while (insert(player.inventory, getSlot(index).getStack(), true, false)
-				&& consumeItems(getSlot(index).getStack(), player, true)) {
-			insert(player.inventory, getSlot(index).getStack(), false, false);
-			consumeItems(getSlot(index).getStack(), player, false);
+		while (consumeItems(getSlot(index).getStack().copy(), player, true)
+				&& insert(player.inventory, getSlot(index).getStack().copy(),
+						true, false)) {
+			consumeItems(getSlot(index).getStack().copy(), player, false);
+			insert(player.inventory, getSlot(index).getStack().copy(), false,
+					false);
 			done++;
 		}
 		if (done == 0)
@@ -173,91 +179,90 @@ public class QuickCon extends Container {
 		for (IRecipe r : CraftingLogic.getRecipes(stack)) {
 			boolean trueMatch = CraftingLogic.match(r, player, true);
 			if (trueMatch && !simulate) {
+				current = r;
 				return CraftingLogic.match(r, player, false);
 			} else if (trueMatch && simulate) {
+				current = r;
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean insert(IInventory inv, ItemStack stacko, boolean simulate,
-			boolean onlyBy) {
-		for (IRecipe recipe : CraftingLogic.getRecipes(stacko)) {
-			ArrayList<ItemStack> ss = new ArrayList<ItemStack>();
-			if (!onlyBy)
-				ss.add(stacko);
-			ArrayList<Object> soll = null;
-			if (recipe instanceof ShapelessRecipes) {
-				soll = new ArrayList<Object>(
-						((ShapelessRecipes) recipe).recipeItems);
-			} else if (recipe instanceof ShapelessOreRecipe) {
-				soll = new ArrayList<Object>(
-						((ShapelessOreRecipe) recipe).getInput());
-			} else if (recipe instanceof ShapedRecipes) {
-				soll = new ArrayList<Object>(
-						Arrays.asList((((ShapedRecipes) recipe).recipeItems)));
-				soll.removeAll(Collections.singleton(null));
-			} else if (recipe instanceof ShapedOreRecipe) {
-				soll = new ArrayList<Object>(
-						Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
-				soll.removeAll(Collections.singleton(null));
-			} else if (recipe instanceof ShapedRecipe) {
-				ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
-				for (Object o : ((ShapedRecipe) recipe).getIngredients()) {
-					if (o != null) {
-						try {
-							tmp.add(new ArrayList(
-									Arrays.asList(((IIngredient) o)
-											.getItemStackSet())));
-						} catch (RegistrationError e) {
-						} catch (MissingIngredientError e) {
-						}
+	private boolean insert(InventoryPlayer inv, ItemStack stacko,
+			boolean simulate, boolean onlyBy) {
+		IRecipe recipe = current;
+		ArrayList<ItemStack> ss = new ArrayList<ItemStack>();
+		if (!onlyBy)
+			ss.add(stacko);
+		ArrayList<Object> soll = null;
+		if (recipe instanceof ShapelessRecipes) {
+			soll = new ArrayList<Object>(
+					((ShapelessRecipes) recipe).recipeItems);
+		} else if (recipe instanceof ShapelessOreRecipe) {
+			soll = new ArrayList<Object>(
+					((ShapelessOreRecipe) recipe).getInput());
+		} else if (recipe instanceof ShapedRecipes) {
+			soll = new ArrayList<Object>(
+					Arrays.asList((((ShapedRecipes) recipe).recipeItems)));
+			soll.removeAll(Collections.singleton(null));
+		} else if (recipe instanceof ShapedOreRecipe) {
+			soll = new ArrayList<Object>(
+					Arrays.asList(((ShapedOreRecipe) recipe).getInput()));
+			soll.removeAll(Collections.singleton(null));
+		} else if (recipe instanceof ShapedRecipe) {
+			ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
+			for (Object o : ((ShapedRecipe) recipe).getIngredients()) {
+				if (o != null) {
+					try {
+						tmp.add(new ArrayList(Arrays.asList(((IIngredient) o)
+								.getItemStackSet())));
+					} catch (RegistrationError e) {
+					} catch (MissingIngredientError e) {
 					}
 				}
-				soll = new ArrayList<Object>(tmp);
-				soll.removeAll(Collections.singleton(null));
-			} else if (recipe instanceof ShapelessRecipe) {
-				ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
-				for (Object o : ((ShapelessRecipe) recipe).getInput()) {
-					if (o != null) {
-						try {
-							tmp.add(new ArrayList(
-									Arrays.asList(((IIngredient) o)
-											.getItemStackSet())));
-						} catch (RegistrationError e) {
-						} catch (MissingIngredientError e) {
-						}
+			}
+			soll = new ArrayList<Object>(tmp);
+			soll.removeAll(Collections.singleton(null));
+		} else if (recipe instanceof ShapelessRecipe) {
+			ArrayList<ArrayList> tmp = new ArrayList<ArrayList>();
+			for (Object o : ((ShapelessRecipe) recipe).getInput()) {
+				if (o != null) {
+					try {
+						tmp.add(new ArrayList(Arrays.asList(((IIngredient) o)
+								.getItemStackSet())));
+					} catch (RegistrationError e) {
+					} catch (MissingIngredientError e) {
 					}
 				}
+			}
+			soll = new ArrayList<Object>(tmp);
+			soll.removeAll(Collections.singleton(null));
+		} else {
+			ArrayList<Object> tmp = findInvoke1(recipe, soll);
+			if (tmp != null && tmp.size() > 0) {
 				soll = new ArrayList<Object>(tmp);
 				soll.removeAll(Collections.singleton(null));
-			} else {
-				ArrayList<Object> tmp = findInvoke1(recipe, soll);
-				if (tmp != null && tmp.size() > 0) {
-					soll = new ArrayList<Object>(tmp);
-					soll.removeAll(Collections.singleton(null));
-				}
 			}
-			if (soll == null || soll.size() == 0)
-				return false;
-			for (Object o : soll) {
-				if (o instanceof ItemStack) {
-					ItemStack stack = (ItemStack) o;
-					if (!stack.getItem().hasContainerItem(stack))
-						continue;
-					ss.add(stack.getItem().getContainerItem(stack));
-				} else if (o instanceof ArrayList /* && !((ArrayList) o).isEmpty() */) {
-					ItemStack stack = (ItemStack) ((ArrayList) o).get(0);
-					if (!stack.getItem().hasContainerItem(stack))
-						continue;
-					ss.add(stack.getItem().getContainerItem(stack));
-				}
-			}
-			if (InventoryHelper.insert(inv, ss, simulate))
-				return true;
-
 		}
+		if (soll == null || soll.size() == 0)
+			return false;
+		for (Object o : soll) {
+			if (o instanceof ItemStack) {
+				ItemStack stack = ((ItemStack) o).copy();
+				if (!stack.getItem().hasContainerItem(stack))
+					continue;
+				ss.add(stack.getItem().getContainerItem(stack));
+			} else if (o instanceof ArrayList /* && !((ArrayList) o).isEmpty() */) {
+				ItemStack stack = ((ItemStack) ((ArrayList) o).get(0)).copy();
+				if (!stack.getItem().hasContainerItem(stack))
+					continue;
+				ss.add(stack.getItem().getContainerItem(stack));
+			}
+		}
+		if (InventoryHelper.insert(inv, ss, simulate))
+			return true;
+
 		return false;
 
 	}
@@ -306,7 +311,7 @@ public class QuickCon extends Container {
 		// System.out.println("index; " + index + ", key: " + key + ", shift: "
 		// + shift);
 		// for (StackTraceElement s : Thread.currentThread().getStackTrace())
-		//		System.out.println(s);
+		// System.out.println(s);
 		if (player.worldObj.isRemote) {
 			this.shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
 			this.control = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);

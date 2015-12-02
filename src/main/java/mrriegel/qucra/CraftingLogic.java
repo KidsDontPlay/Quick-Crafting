@@ -145,7 +145,8 @@ public class CraftingLogic {
 		ArrayList<IRecipe> lis = new ArrayList<IRecipe>();
 		for (Object o : CraftingManager.getInstance().getRecipeList()) {
 			if (InventoryHelper.areStacksEqual(stack,
-					((IRecipe) o).getRecipeOutput(), false)) {
+					((IRecipe) o).getRecipeOutput(), false)
+					&& ((IRecipe) o).getRecipeOutput().stackSize == stack.stackSize) {
 				lis.add((IRecipe) o);
 			}
 		}
