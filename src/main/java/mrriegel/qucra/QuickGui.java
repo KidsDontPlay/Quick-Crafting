@@ -47,10 +47,9 @@ public class QuickGui extends GuiContainer {
 
 	@Override
 	protected void actionPerformed(GuiButton p_146284_1_) {
-		QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
+		QuickCon con = (QuickCon) (Minecraft.getMinecraft().thePlayer.openContainer);
 		con.arrange(p_146284_1_.id);
 		PacketHandler.INSTANCE.sendToServer(new ScrollMessage(p_146284_1_.id));
-
 	}
 
 	@Override

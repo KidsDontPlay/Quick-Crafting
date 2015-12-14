@@ -21,6 +21,8 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.input.Keyboard;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import appeng.api.exceptions.MissingIngredientError;
 import appeng.api.exceptions.RegistrationError;
 import appeng.api.recipes.IIngredient;
@@ -139,6 +141,11 @@ public class QuickCon extends Container {
 			done = consumeItems(getSlot(index).getStack().copy(), player, false)
 					&& insert(player.inventory, getSlot(index).getStack()
 							.copy(), false, true);
+			FMLCommonHandler
+					.instance()
+					.bus()
+					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
+							index).getStack().copy(), null));
 		}
 		return done ? super.slotClick(index, 0, 0, player) : null;
 	}
@@ -153,6 +160,11 @@ public class QuickCon extends Container {
 			done = consumeItems(getSlot(index).getStack().copy(), player, false)
 					&& insert(player.inventory, getSlot(index).getStack()
 							.copy(), false, false);
+			FMLCommonHandler
+					.instance()
+					.bus()
+					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
+							index).getStack().copy(), null));
 		}
 		return done ? getSlot(index).getStack().copy() : null;
 	}
@@ -167,6 +179,11 @@ public class QuickCon extends Container {
 			consumeItems(getSlot(index).getStack().copy(), player, false);
 			insert(player.inventory, getSlot(index).getStack().copy(), false,
 					false);
+			FMLCommonHandler
+					.instance()
+					.bus()
+					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
+							index).getStack().copy(), null));
 			done++;
 		}
 		if (done == 0)
@@ -267,8 +284,7 @@ public class QuickCon extends Container {
 
 	}
 
-	private static ArrayList<Object> findInvoke1(IRecipe r,
-			ArrayList<Object> soll) {
+	private ArrayList<Object> findInvoke1(IRecipe r, ArrayList<Object> soll) {
 		Method m = null;
 		Object[] fin = null;
 		try {
@@ -308,10 +324,6 @@ public class QuickCon extends Container {
 	@Override
 	public ItemStack slotClick(int index, int key, int shift,
 			EntityPlayer player) {
-		// System.out.println("index; " + index + ", key: " + key + ", shift: "
-		// + shift);
-		// for (StackTraceElement s : Thread.currentThread().getStackTrace())
-		// System.out.println(s);
 		if (player.worldObj.isRemote) {
 			this.shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
 			this.control = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL);
@@ -322,6 +334,7 @@ public class QuickCon extends Container {
 		ItemStack ss = null;
 		if (index >= 0 && index < 63 && key == 0
 				&& getSlot(index).getHasStack()) {
+
 			if (this.shift) {
 				ss = clickShift(index, player);
 			} else if (this.control) {
