@@ -21,8 +21,6 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.input.Keyboard;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import appeng.api.exceptions.MissingIngredientError;
 import appeng.api.exceptions.RegistrationError;
 import appeng.api.recipes.IIngredient;
@@ -141,11 +139,6 @@ public class QuickCon extends Container {
 			done = consumeItems(getSlot(index).getStack().copy(), player, false)
 					&& insert(player.inventory, getSlot(index).getStack()
 							.copy(), false, true);
-			FMLCommonHandler
-					.instance()
-					.bus()
-					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
-							index).getStack().copy(), null));
 		}
 		return done ? super.slotClick(index, 0, 0, player) : null;
 	}
@@ -160,11 +153,6 @@ public class QuickCon extends Container {
 			done = consumeItems(getSlot(index).getStack().copy(), player, false)
 					&& insert(player.inventory, getSlot(index).getStack()
 							.copy(), false, false);
-			FMLCommonHandler
-					.instance()
-					.bus()
-					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
-							index).getStack().copy(), null));
 		}
 		return done ? getSlot(index).getStack().copy() : null;
 	}
@@ -179,11 +167,6 @@ public class QuickCon extends Container {
 			consumeItems(getSlot(index).getStack().copy(), player, false);
 			insert(player.inventory, getSlot(index).getStack().copy(), false,
 					false);
-			FMLCommonHandler
-					.instance()
-					.bus()
-					.post(new PlayerEvent.ItemCraftedEvent(player, getSlot(
-							index).getStack().copy(), null));
 			done++;
 		}
 		if (done == 0)
@@ -334,7 +317,6 @@ public class QuickCon extends Container {
 		ItemStack ss = null;
 		if (index >= 0 && index < 63 && key == 0
 				&& getSlot(index).getHasStack()) {
-
 			if (this.shift) {
 				ss = clickShift(index, player);
 			} else if (this.control) {
@@ -353,7 +335,8 @@ public class QuickCon extends Container {
 
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-		throw new UnsupportedOperationException("Please make a bug report");
+		System.out.println("Nothing");
+		return null;
 	}
 
 	public void updateContainer(EntityPlayer player, QuickInv inv) {

@@ -1,6 +1,5 @@
 package mrriegel.qucra;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -18,9 +17,11 @@ public class QuickGui extends GuiContainer {
 	int guiRight = guiLeft + this.xSize;
 	int guiBot = guiTop + this.ySize;
 	private GuiButton up, down;
+	private QuickCon con;
 
 	public QuickGui(Container p_i1072_1_) {
 		super(p_i1072_1_);
+		con = (QuickCon) inventorySlots;
 		xSize = 184;
 		ySize = 220;
 	}
@@ -43,13 +44,14 @@ public class QuickGui extends GuiContainer {
 		down = new GuiButton(-1, guiLeft - 22, guiTop + 30, 20, 20, " "
 				+ String.valueOf((char) 10225));
 		buttonList.add(down);
+		ableButtons();
 	}
 
 	@Override
 	protected void actionPerformed(GuiButton p_146284_1_) {
-		QuickCon con = (QuickCon) (Minecraft.getMinecraft().thePlayer.openContainer);
 		con.arrange(p_146284_1_.id);
 		PacketHandler.INSTANCE.sendToServer(new ScrollMessage(p_146284_1_.id));
+		ableButtons();
 	}
 
 	@Override
@@ -71,9 +73,9 @@ public class QuickGui extends GuiContainer {
 			if (this.searchBar.textboxKeyTyped(p_73869_1_, p_73869_2_)) {
 				PacketHandler.INSTANCE.sendToServer(new SearchMessage(searchBar
 						.getText()));
-				QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
 				con.setSearch(searchBar.getText());
 				con.updateContainer(con.player, con.inv);
+				ableButtons();
 			} else {
 				super.keyTyped(p_73869_1_, p_73869_2_);
 			}
@@ -91,11 +93,21 @@ public class QuickGui extends GuiContainer {
 			int mouse = Mouse.getEventDWheel();
 			if (mouse == 0)
 				return;
-			QuickCon con = (QuickCon) ((QuickGui) Minecraft.getMinecraft().currentScreen).inventorySlots;
 			con.arrange(mouse);
 			PacketHandler.INSTANCE.sendToServer(new ScrollMessage(mouse));
+			ableButtons();
 		}
 
 	}
 
+	void ableButtons() {
+		if (con.position == 0)
+			up.enabled = false;
+		else
+			up.enabled = true;
+		if (con.position == con.maxPosition)
+			down.enabled = false;
+		else
+			down.enabled = true;
+	}
 }

@@ -11,7 +11,7 @@ public class ConfigurationHandler {
 	public static void refreshConfig() {
 		scroll = config.get("Client", "mousewheel", true,
 				"Enable scrolling with mousewheel. Could be buggy with NEI")
-		.getBoolean();
+				.getBoolean();
 		if (config.hasChanged()) {
 			config.save();
 		}
