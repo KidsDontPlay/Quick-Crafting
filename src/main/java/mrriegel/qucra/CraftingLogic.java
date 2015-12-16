@@ -76,10 +76,15 @@ public class CraftingLogic {
 
 	public static boolean contains(Object o, IInventory inv) {
 		if (o instanceof ItemStack) {
+			ItemStack stack = (ItemStack) o;
+			if (stack == null || stack.getItem() == null)
+				return false;
 			return InventoryHelper.consumeInventoryItem(inv, (ItemStack) o, 1);
 		} else if (o instanceof Collection) {
 			for (Object obj : (Collection) o) {
 				ItemStack stack = (ItemStack) obj;
+				if (stack == null || stack.getItem() == null)
+					return false;
 				if (InventoryHelper.consumeInventoryItem(inv, stack, 1)) {
 					return true;
 				}

@@ -22,7 +22,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 @Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
-	public static final String VERSION = "1.8-1.3";
+	public static final String VERSION = "1.8-1.5";
 	public static final String MODNAME = "QuickCrafting";
 
 	@Instance(QuickCrafting.MODID)

@@ -258,7 +258,8 @@ public class QuickCon extends Container {
 
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slot) {
-		throw new UnsupportedOperationException("Please make a bug report");
+		System.out.println("Nothing");
+		return null;
 	}
 
 	public void updateContainer(EntityPlayer player, QuickInv inv) {
