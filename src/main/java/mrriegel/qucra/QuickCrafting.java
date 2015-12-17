@@ -17,7 +17,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
-	public static final String VERSION = "1.7.10-1.5";
+	public static final String VERSION = "1.7.10-1.6";
 	public static final String MODNAME = "QuickCrafting";
 
 	@Instance(QuickCrafting.MODID)
