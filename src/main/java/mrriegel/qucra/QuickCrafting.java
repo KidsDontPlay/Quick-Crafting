@@ -22,7 +22,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 @Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
-	public static final String VERSION = "1.8-1.5";
+	public static final String VERSION = "1.8-1.6";
 	public static final String MODNAME = "QuickCrafting";
 
 	@Instance(QuickCrafting.MODID)
@@ -49,8 +49,6 @@ public class QuickCrafting {
 		GameRegistry.addShapedRecipe(new ItemStack(BlockQuickTable.qt), "cic",
 				"iki", "cic", 'c', Blocks.crafting_table, 'i',
 				Items.iron_ingot, 'k', Blocks.coal_block);
-		GameRegistry.addRecipe(new ShapelessOreRecipe(Blocks.gold_block,
-				Items.redstone, Items.apple));
 		if (event.getSide() == Side.CLIENT) {
 			Minecraft
 					.getMinecraft()

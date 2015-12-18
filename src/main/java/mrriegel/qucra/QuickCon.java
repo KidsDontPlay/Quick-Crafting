@@ -155,15 +155,30 @@ public class QuickCon extends Container {
 			return null;
 		while (consumeItems(getSlot(index).getStack(), player, true)
 				&& insert(player.inventory, getSlot(index).getStack(), true,
-						false)) {
+						false)
+				&& done + getSlot(index).getStack().copy().stackSize <= getSlot(
+						index).getStack().copy().getMaxStackSize()) {
 			consumeItems(getSlot(index).getStack(), player, false);
 			insert(player.inventory, getSlot(index).getStack(), false, false);
 
-			done++;
+			done += getSlot(index).getStack().copy().stackSize;
 		}
-		if (done == 0)
-			return null;
 		return done != 0 ? getSlot(index).getStack().copy() : null;
+	}
+
+	private ItemStack clickShiftControl(int index, EntityPlayer player) {
+		boolean done = false;
+		if (player.inventory.getItemStack() != null)
+			return null;
+		while (consumeItems(getSlot(index).getStack().copy(), player, true)
+				&& insert(player.inventory, getSlot(index).getStack().copy(),
+						true, false)) {
+			consumeItems(getSlot(index).getStack().copy(), player, false);
+			insert(player.inventory, getSlot(index).getStack().copy(), false,
+					false);
+			done = true;
+		}
+		return done ? getSlot(index).getStack().copy() : null;
 	}
 
 	private boolean consumeItems(ItemStack stack, EntityPlayer player,
@@ -240,7 +255,9 @@ public class QuickCon extends Container {
 		ItemStack ss = null;
 		if (index >= 0 && index < 63 && key == 0
 				&& getSlot(index).getHasStack()) {
-			if (this.shift) {
+			if (this.shift && this.control) {
+				ss = clickShiftControl(index, player);
+			} else if (this.shift) {
 				ss = clickShift(index, player);
 			} else if (this.control) {
 				ss = clickControl(index, player);
