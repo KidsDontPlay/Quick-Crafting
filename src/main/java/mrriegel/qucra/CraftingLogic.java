@@ -30,6 +30,7 @@ public class CraftingLogic {
 		IRecipe rec = findInvoke2(r);
 		if (rec != null)
 			r = rec;
+
 		if (r instanceof ShapelessRecipes) {
 			soll = new ArrayList<Object>(((ShapelessRecipes) r).recipeItems);
 		} else if (r instanceof ShapelessOreRecipe) {
@@ -79,6 +80,13 @@ public class CraftingLogic {
 		}
 		if (soll == null || soll.size() == 0)
 			return false;
+		if (r.getRecipeOutput() != null
+				&& r.getRecipeOutput().getDisplayName().contains("Pulve")
+				&& r.getRecipeOutput().getDisplayName().contains("Basic")) {
+			System.out.println(r.getRecipeOutput().getTagCompound());
+			for (Object ob : soll)
+				System.out.println(ob);
+		}
 		IInventory alf = new InventoryCopy(player.inventory);
 		for (Object o : soll) {
 			if (!contains(o, simulate ? alf : player.inventory)) {
