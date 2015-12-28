@@ -14,7 +14,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(modid = QuickCrafting.MODID, version = QuickCrafting.VERSION)
+@Mod(modid = QuickCrafting.MODID, name = QuickCrafting.MODNAME, version = QuickCrafting.VERSION)
 public class QuickCrafting {
 	public static final String MODID = "qucra";
 	public static final String VERSION = "1.7.10-1.6";

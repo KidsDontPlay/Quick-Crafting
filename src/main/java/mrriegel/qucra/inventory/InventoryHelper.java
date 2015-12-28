@@ -18,8 +18,7 @@ public class InventoryHelper {
 	/** nicked from reika */
 	public static boolean insert(IInventory inv, ItemStack is, boolean simulate) {
 		ItemStack stack = is.copy();
-		Integer[] slots = getSlotsWith(inv, stack.getItem(),
-				stack.getItemDamage());
+		Integer[] slots = getSlotsWith(inv, stack);
 		int empty = findEmptySlot(inv);
 
 		int max = Math.min(inv.getInventoryStackLimit(),
@@ -133,7 +132,7 @@ public class InventoryHelper {
 	public static boolean IsEnoughPresent(IInventory inv, ItemStack stack,
 			int num) {
 		int number = 0;
-		for (int i : getSlotsWith(inv, stack.getItem(), stack.getItemDamage()))
+		for (int i : getSlotsWith(inv, stack))
 			number += inv.getStackInSlot(i).stackSize;
 		return number >= num;
 	}
@@ -218,9 +217,9 @@ public class InventoryHelper {
 		return true;
 	}
 
-	public static boolean consumeInventoryItem(IInventory inv, Item item,
-			int meta, int num) {
-		Integer[] i = getSlotsWith(inv, item, meta);
+	public static boolean consumeInventoryItem(IInventory inv,
+			ItemStack itemStack, int num) {
+		Integer[] i = getSlotsWith(inv, itemStack);
 		for (int s : i) {
 			ItemStack stack = inv.getStackInSlot(s);
 			if (stack.stackSize > num) {
@@ -237,20 +236,16 @@ public class InventoryHelper {
 		return false;
 	}
 
-	public static boolean consumeInventoryItem(IInventory inv, ItemStack stack,
-			int num) {
-		return consumeInventoryItem(inv, stack.getItem(),
-				stack.getItemDamage(), num);
-	}
-
-	public static Integer[] getSlotsWith(IInventory inv, Item item, int meta) {
+	public static Integer[] getSlotsWith(IInventory inv, ItemStack itemStack) {
 		ArrayList<Integer> ar = new ArrayList<Integer>();
 		for (int i = 0; i < inv.getSizeInventory()
 				- ((inv instanceof InventoryPlayer) ? 4 : 0); ++i) {
 			ItemStack stack = inv.getStackInSlot(i);
 			if (stack != null
-					&& stack.getItem().equals(item)
-					&& (stack.getItemDamage() == meta || meta == OreDictionary.WILDCARD_VALUE)) {
+					&& stack.getItem().equals(itemStack.getItem())
+					&& (stack.getItemDamage() == itemStack.getItemDamage() || itemStack
+							.getItemDamage() == OreDictionary.WILDCARD_VALUE)
+					&& ItemStack.areItemStackTagsEqual(itemStack, stack)) {
 				ar.add(i);
 			}
 		}

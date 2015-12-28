@@ -133,7 +133,7 @@ public class QuickCon extends Container {
 						true, true)
 				&& (player.inventory.getItemStack() == null || (InventoryHelper
 						.areStacksEqual(player.inventory.getItemStack(),
-								getSlot(index).getStack().copy(), false) && getSlot(
+								getSlot(index).getStack().copy(), true) && getSlot(
 						index).getStack().copy().stackSize
 						+ player.inventory.getItemStack().stackSize <= getSlot(
 							index).getStack().copy().getMaxStackSize()))) {
@@ -212,6 +212,9 @@ public class QuickCon extends Container {
 		if (!onlyBy)
 			ss.add(stacko);
 		ArrayList<Object> soll = null;
+		IRecipe rec = CraftingLogic.findInvoke2(recipe);
+		if (rec != null)
+			recipe = rec;
 		if (recipe instanceof ShapelessRecipes) {
 			soll = new ArrayList<Object>(
 					((ShapelessRecipes) recipe).recipeItems);
@@ -255,7 +258,7 @@ public class QuickCon extends Container {
 			soll = new ArrayList<Object>(tmp);
 			soll.removeAll(Collections.singleton(null));
 		} else {
-			ArrayList<Object> tmp = findInvoke1(recipe, soll);
+			ArrayList<Object> tmp = CraftingLogic.findInvoke1(recipe, soll);
 			if (tmp != null && tmp.size() > 0) {
 				soll = new ArrayList<Object>(tmp);
 				soll.removeAll(Collections.singleton(null));
@@ -281,43 +284,6 @@ public class QuickCon extends Container {
 
 		return false;
 
-	}
-
-	private ArrayList<Object> findInvoke1(IRecipe r, ArrayList<Object> soll) {
-		Method m = null;
-		Object[] fin = null;
-		try {
-			m = r.getClass().getMethod("getInput", (Class<?>[]) null);
-		} catch (NoSuchMethodException e) {
-			return null;
-		} catch (SecurityException e) {
-			return null;
-		}
-		if (m == null)
-			return null;
-
-		try {
-			fin = (Object[]) m.invoke(r, (Object[]) null);
-		} catch (ClassCastException e) {
-		} catch (IllegalAccessException e) {
-			return null;
-		} catch (IllegalArgumentException e) {
-			return null;
-		} catch (InvocationTargetException e) {
-			return null;
-		}
-		if (fin == null)
-			return null;
-		ArrayList<Object> res = new ArrayList<Object>();
-		for (Object o : fin) {
-			if (o instanceof ItemStack) {
-				res.add(o);
-			} else if (o instanceof ArrayList && !((ArrayList) o).isEmpty()
-					&& ((ArrayList) o).get(0) instanceof ItemStack) {
-				res.add(o);
-			}
-		}
-		return res;
 	}
 
 	@Override

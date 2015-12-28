@@ -13,6 +13,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.RecipeFireworks;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -26,6 +27,9 @@ import appeng.recipes.game.ShapelessRecipe;
 public class CraftingLogic {
 	public static boolean match(IRecipe r, EntityPlayer player, boolean simulate) {
 		ArrayList<Object> soll = null;
+		IRecipe rec = findInvoke2(r);
+		if (rec != null)
+			r = rec;
 		if (r instanceof ShapelessRecipes) {
 			soll = new ArrayList<Object>(((ShapelessRecipes) r).recipeItems);
 		} else if (r instanceof ShapelessOreRecipe) {
@@ -85,7 +89,7 @@ public class CraftingLogic {
 
 	}
 
-	private static ArrayList<Object> findInvoke1(IRecipe r,
+	public static ArrayList<Object> findInvoke1(IRecipe r,
 			ArrayList<Object> soll) {
 		Method m = null;
 		Object[] fin = null;
@@ -123,6 +127,34 @@ public class CraftingLogic {
 		return res;
 	}
 
+	public static IRecipe findInvoke2(IRecipe r) {
+		Method m = null;
+		IRecipe fin = null;
+		try {
+			m = r.getClass().getMethod("getWrappedRecipe", (Class<?>[]) null);
+		} catch (NoSuchMethodException e) {
+			return null;
+		} catch (SecurityException e) {
+			return null;
+		}
+		if (m == null)
+			return null;
+
+		try {
+			fin = (IRecipe) m.invoke(r, (Object[]) null);
+		} catch (ClassCastException e) {
+		} catch (IllegalAccessException e) {
+			return null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		} catch (InvocationTargetException e) {
+			return null;
+		}
+		if (fin == null)
+			return null;
+		return fin;
+	}
+
 	public static ArrayList<ItemStack> getCraftableStack(EntityPlayer player) {
 		ArrayList<ItemStack> lis = new ArrayList<ItemStack>();
 		for (Object o : CraftingManager.getInstance().getRecipeList()) {
@@ -136,7 +168,7 @@ public class CraftingLogic {
 
 	private static boolean checkIn(ArrayList<ItemStack> lis, ItemStack stack) {
 		for (ItemStack s : lis)
-			if (InventoryHelper.areStacksEqual(stack, s, false))
+			if (InventoryHelper.areStacksEqual(stack, s, true))
 				return false;
 		return true;
 	}
@@ -145,7 +177,7 @@ public class CraftingLogic {
 		ArrayList<IRecipe> lis = new ArrayList<IRecipe>();
 		for (Object o : CraftingManager.getInstance().getRecipeList()) {
 			if (InventoryHelper.areStacksEqual(stack,
-					((IRecipe) o).getRecipeOutput(), false)
+					((IRecipe) o).getRecipeOutput(), true)
 					&& ((IRecipe) o).getRecipeOutput().stackSize == stack.stackSize) {
 				lis.add((IRecipe) o);
 			}
